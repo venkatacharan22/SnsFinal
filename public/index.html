@@ -354,11 +354,10 @@
                 if (selectedFile) formData.append('image', selectedFile);
                 formData.append('language', languageSelect.value);
 
-                // For Firebase deployment, we'll use a demo mode
-                // Replace this URL with your deployed backend URL
+                // Backend URL configuration
                 const API_BASE_URL = window.location.hostname === 'localhost'
                     ? 'http://localhost:5001'
-                    : 'https://your-backend-url.com'; // Replace with your actual backend URL
+                    : 'https://truthlens-backend-[hash]-us-central1.a.run.app'; // Will be updated after deployment
 
                 // Try to call the API, fallback to demo mode if it fails
                 try {
@@ -554,11 +553,15 @@
         speakResultsBtn.addEventListener('click', async () => {
             if (currentResult) {
                 const originalText = speakResultsBtn.innerHTML;
-                speakResultsBtn.innerHTML = '🔄 Generating...';
+                speakResultsBtn.innerHTML = '🔄 Generating Audio...';
                 speakResultsBtn.disabled = true;
 
                 try {
-                    const textToSpeak = currentResult.summary || currentResult.reasoning;
+                    const textToSpeak = currentResult.summary || currentResult.reasoning || currentResult.recommendation;
+                    const selectedLanguage = currentResult.language || languageSelect.value;
+
+                    console.log('TTS Request:', { text: textToSpeak.substring(0, 50), language: selectedLanguage });
+
                     const response = await fetch(`${API_BASE_URL}/api/text-to-speech`, {
                         method: 'POST',
                         headers: {
@@ -566,16 +569,22 @@
                         },
                         body: JSON.stringify({
                             text: textToSpeak,
-                            language: currentResult.language || languageSelect.value
+                            language: selectedLanguage
                         })
                     });
 
-                    const data = await response.json();
+                    console.log('TTS Response status:', response.status);
 
-                    if (data.success) {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('TTS Response data:', data.success ? 'Success' : data.error);
+
+                    if (data.success && data.audio) {
                         // Create audio element and play
                         const audio = new Audio(`data:audio/mp3;base64,${data.audio}`);
-                        audio.play();
 
                         speakResultsBtn.innerHTML = '🔊 Playing...';
 
@@ -583,11 +592,27 @@
                             speakResultsBtn.innerHTML = originalText;
                             speakResultsBtn.disabled = false;
                         };
+
+                        audio.onerror = (e) => {
+                            console.error('Audio playback error:', e);
+                            speakResultsBtn.innerHTML = originalText;
+                            speakResultsBtn.disabled = false;
+                            alert('Audio playback failed. Please try again.');
+                        };
+
+                        // Play the audio
+                        try {
+                            await audio.play();
+                        } catch (playError) {
+                            console.error('Play error:', playError);
+                            throw new Error('Could not play audio');
+                        }
                     } else {
-                        throw new Error(data.error || 'TTS failed');
+                        throw new Error(data.error || 'Text-to-speech generation failed');
                     }
                 } catch (error) {
-                    alert('Text-to-speech error: ' + error.message);
+                    console.error('TTS Error:', error);
+                    alert(`Text-to-speech error: ${error.message}`);
                     speakResultsBtn.innerHTML = originalText;
                     speakResultsBtn.disabled = false;
                 }

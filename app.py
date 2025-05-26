@@ -179,8 +179,45 @@ def text_to_speech():
         if not text:
             return jsonify({'error': 'Text is required'}), 400
 
-        # Create TTS audio
-        tts = gTTS(text=text, lang=language, slow=False)
+        # Language mapping for gTTS (some languages need specific codes)
+        tts_lang_map = {
+            'hi': 'hi',    # Hindi
+            'ta': 'ta',    # Tamil
+            'te': 'te',    # Telugu
+            'ml': 'ml',    # Malayalam
+            'kn': 'kn',    # Kannada
+            'bn': 'bn',    # Bengali
+            'gu': 'gu',    # Gujarati
+            'mr': 'mr',    # Marathi
+            'pa': 'pa',    # Punjabi
+            'en': 'en',    # English
+            'es': 'es',    # Spanish
+            'fr': 'fr',    # French
+            'de': 'de',    # German
+            'it': 'it',    # Italian
+            'pt': 'pt',    # Portuguese
+            'ru': 'ru',    # Russian
+            'ja': 'ja',    # Japanese
+            'ko': 'ko',    # Korean
+            'zh': 'zh-cn', # Chinese (Simplified)
+            'ar': 'ar',    # Arabic
+            'tr': 'tr',    # Turkish
+            'nl': 'nl',    # Dutch
+            'sv': 'sv'     # Swedish
+        }
+
+        # Get the correct TTS language code
+        tts_language = tts_lang_map.get(language, 'en')
+
+        print(f"TTS Request - Text: {text[:50]}..., Language: {language} -> {tts_language}")
+
+        # Create TTS audio with error handling
+        try:
+            tts = gTTS(text=text, lang=tts_language, slow=False)
+        except Exception as tts_error:
+            print(f"TTS Error for language {tts_language}: {tts_error}")
+            # Fallback to English if the language is not supported
+            tts = gTTS(text=text, lang='en', slow=False)
 
         # Save to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmp_file:
@@ -196,13 +233,15 @@ def text_to_speech():
         return jsonify({
             'success': True,
             'audio': audio_data,
-            'format': 'mp3'
+            'format': 'mp3',
+            'language': tts_language
         })
 
     except Exception as e:
+        print(f"TTS Error: {str(e)}")
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'Text-to-speech failed: {str(e)}'
         }), 500
 
 @app.route('/api/languages')
