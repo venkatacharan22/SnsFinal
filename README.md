@@ -1,233 +1,237 @@
-# TruthLens AI - Fake News Detection System
+# 🔍 TruthLens AI - Multilingual Fake News Detection
 
-A sophisticated web application that uses Google's Gemini AI to detect fake news and misinformation in both text and image content. Built with React, Node.js, and modern web technologies.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com)
+[![Gemini](https://img.shields.io/badge/Gemini-2.0%20Flash-orange.svg)](https://ai.google.dev)
+[![Mobile](https://img.shields.io/badge/Mobile-Responsive-purple.svg)](https://tailwindcss.com)
+
+Advanced multilingual fake news detection system powered by Google's Gemini AI with support for 23 languages including 10 Indian languages.
 
 ## 🌟 Features
 
-### ✨ Core Functionality
-- **Text Analysis**: Analyze news articles, headlines, and text content for authenticity
-- **Image Analysis**: Upload and analyze news screenshots and images
-- **AI-Powered Detection**: Powered by Google's Gemini 3 27B model via Vertex AI
-- **Confidence Scoring**: Get percentage-based confidence scores (70-95%)
-- **Source Credibility**: Analysis of potential sources and their credibility levels
-- **Detailed Reasoning**: Comprehensive explanations for each analysis result
+### 🇮🇳 **Indian Language Support**
+- **10 Indian Languages**: Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Gujarati, Marathi, Punjabi
+- **Native Scripts**: Proper display of Devanagari, Tamil, Telugu, Malayalam scripts
+- **Cultural Context**: AI understands regional misinformation patterns
 
-### 🎨 User Experience
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Glassmorphism UI**: Modern, elegant interface with glass-like effects
-- **Dark/Light Mode**: Toggle between themes with smooth transitions
-- **Smooth Animations**: Framer Motion powered animations throughout
-- **Typewriter Effect**: Engaging hero section with animated text
-- **Loading Animations**: Beautiful loading states during analysis
+### 🌍 **Multilingual Analysis**
+- **23 Total Languages**: 10 Indian + 13 International languages
+- **Real-time Translation**: Results in your preferred language
+- **Cross-language Detection**: Analyze content in any language
 
-### 🔧 Technical Features
-- **Real-time Analysis**: Fast processing with animated progress indicators
-- **File Upload**: Drag-and-drop image upload with validation
-- **Rate Limiting**: Built-in API rate limiting for stability
-- **Error Handling**: Comprehensive error handling and user feedback
-- **Demo Mode**: Fallback demo mode when API is not configured
+### 🤖 **AI-Powered Detection**
+- **Gemini 2.0 Flash**: Latest Google AI model for accurate analysis
+- **Confidence Scoring**: 70-95% confidence levels
+- **Source Analysis**: Credibility assessment of news sources
+- **Red Flag Detection**: Identifies misinformation patterns
+- **Debunking Database**: Checks against known false claims
+
+### 📱 **Mobile-First Design**
+- **Fully Responsive**: Perfect on mobile, tablet, and desktop
+- **Touch-Friendly**: Optimized for mobile interactions
+- **Fast Loading**: Optimized performance for all devices
+- **Cyber Theme**: Modern neon-styled interface
+
+### 🔊 **Text-to-Speech**
+- **Multi-language TTS**: Hear results in your selected language
+- **Google TTS**: High-quality voice synthesis
+- **Accessibility**: Audio support for visually impaired users
+
+### 🖼️ **Image Analysis**
+- **Upload Support**: Drag & drop image upload
+- **Screenshot Analysis**: Analyze news screenshots
+- **Visual Verification**: Detect manipulated images
+- **Context Analysis**: Check for misleading captions
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Google Cloud account (for production Gemini AI)
+- Python 3.8+
+- Google Gemini API key
 
 ### Installation
 
 1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd TruthLens-AI
-   ```
-
-2. **Install Frontend Dependencies**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-3. **Install Backend Dependencies**
-   ```bash
-   cd ../backend
-   npm install
-   ```
-
-4. **Configure Environment Variables**
-   
-   **Backend (.env):**
-   ```env
-   PORT=3001
-   NODE_ENV=development
-   GOOGLE_API_KEY=your-google-api-key
-   GOOGLE_PROJECT_ID=your-project-id
-   GOOGLE_LOCATION=us-central1
-   FRONTEND_URL=http://localhost:5173
-   ```
-
-   **Frontend (.env):**
-   ```env
-   VITE_API_URL=http://localhost:3001
-   ```
-
-5. **Start the Development Servers**
-   
-   **Backend:**
-   ```bash
-   cd backend
-   npm run dev
-   ```
-
-   **Frontend (in a new terminal):**
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-
-6. **Open the Application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:3001
-   - Health Check: http://localhost:3001/health
-
-## 🏗️ Project Structure
-
-```
-TruthLens-AI/
-├── frontend/                 # React + Vite frontend
-│   ├── src/
-│   │   ├── components/      # UI components
-│   │   │   ├── Hero.jsx
-│   │   │   ├── InputSection.jsx
-│   │   │   ├── ResultSection.jsx
-│   │   │   ├── LoadingAnimation.jsx
-│   │   │   └── ThemeToggle.jsx
-│   │   ├── hooks/          # Custom React hooks
-│   │   │   └── useTheme.js
-│   │   ├── utils/          # Utility functions
-│   │   │   └── api.js
-│   │   └── styles/         # CSS and styling
-│   └── package.json
-├── backend/                 # Node.js + Express backend
-│   ├── routes/             # API routes
-│   │   └── analyze.js
-│   ├── services/           # Business logic
-│   │   └── geminiService.js
-│   ├── middleware/         # Express middleware
-│   │   ├── upload.js
-│   │   ├── validation.js
-│   │   ├── errorHandler.js
-│   │   └── rateLimiter.js
-│   └── server.js
-└── README.md
+```bash
+git clone https://github.com/venkatacharan22/SnsFinal.git
+cd SnsFinal
 ```
 
-## 🔧 API Endpoints
+2. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
 
-### POST /api/analyze
-Analyze text or image content for fake news detection.
+3. **Set up API key**
+- Get your Gemini API key from [Google AI Studio](https://ai.google.dev)
+- Update the API key in `app.py` (line 14)
 
-**Request:**
-```json
+4. **Run the application**
+```bash
+python3 app.py
+```
+
+5. **Open in browser**
+```
+http://localhost:5001
+```
+
+## 📖 Usage
+
+### Web Interface
+1. **Select Language**: Choose from 23 supported languages
+2. **Enter Content**: Type news text or upload an image
+3. **Analyze**: Click "Analyze for Truth" button
+4. **View Results**: Get comprehensive analysis with confidence score
+5. **Listen**: Use text-to-speech to hear results
+6. **Share**: Copy results to clipboard
+
+### API Endpoints
+
+#### Analyze Content
+```bash
+POST /api/analyze
+Content-Type: multipart/form-data
+
+Parameters:
+- text: News content to analyze
+- image: Image file (optional)
+- language: Output language code (default: 'en')
+```
+
+#### Text-to-Speech
+```bash
+POST /api/text-to-speech
+Content-Type: application/json
+
+Body:
 {
-  "text": "News content to analyze"
+  "text": "Text to convert to speech",
+  "language": "en"
 }
 ```
 
-Or with FormData for image upload:
-```
-text: "Optional text content"
-image: [File object]
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "isReal": true,
-    "confidence": 85,
-    "reasoning": "Analysis explanation...",
-    "sources": [
-      {"name": "Reuters", "credibility": "High"}
-    ],
-    "redFlags": [],
-    "factualClaims": ["Verifiable claims found"],
-    "recommendation": "Verification recommendation"
-  },
-  "timestamp": "2025-05-26T03:28:01.900Z"
-}
+#### Get Languages
+```bash
+GET /api/languages
 ```
 
-### GET /api/status
-Check the status of the Gemini AI service.
+## 🌐 Supported Languages
 
-### GET /health
-Health check endpoint for the backend service.
+### 🇮🇳 Indian Languages
+| Code | Language | Script |
+|------|----------|--------|
+| `hi` | हिंदी (Hindi) | Devanagari |
+| `ta` | தமிழ் (Tamil) | Tamil |
+| `te` | తెలుగు (Telugu) | Telugu |
+| `ml` | മലയാളം (Malayalam) | Malayalam |
+| `kn` | ಕನ್ನಡ (Kannada) | Kannada |
+| `bn` | বাংলা (Bengali) | Bengali |
+| `gu` | ગુજરાતી (Gujarati) | Gujarati |
+| `mr` | मराठी (Marathi) | Devanagari |
+| `pa` | ਪੰਜਾਬੀ (Punjabi) | Gurmukhi |
 
-## 🎯 Demo Mode
+### 🌍 International Languages
+| Code | Language |
+|------|----------|
+| `en` | English |
+| `es` | Spanish |
+| `fr` | French |
+| `de` | German |
+| `it` | Italian |
+| `pt` | Portuguese |
+| `ru` | Russian |
+| `ja` | Japanese |
+| `ko` | Korean |
+| `zh` | Chinese |
+| `ar` | Arabic |
+| `tr` | Turkish |
+| `nl` | Dutch |
+| `sv` | Swedish |
 
-The application includes a demo mode that activates when:
-- Running in development environment
-- Google API key is not properly configured
-- Gemini API is unavailable
+## 🧪 Testing Examples
 
-Demo mode provides realistic simulated responses based on content analysis heuristics.
+### Hindi (हिंदी)
+```
+तत्काल: नासा ने पुष्टि की है कि पृथ्वी पर 15 दिन तक अंधकार रहेगा ग्रहों की स्थिति के कारण!
+```
 
-## 🔐 Google Cloud Setup
+### Tamil (தமிழ்)
+```
+அதிர்ச்சி: நாசா உறுதிப்படுத்தியுள்ளது - கிரக சீரமைப்பு காரணமாக பூமியில் 15 நாட்கள் இருள் நிலவும்!
+```
 
-To use the real Gemini AI (production mode):
+### English
+```
+Breaking: NASA confirms Earth will experience darkness for 15 days due to planetary alignment!
+```
 
-1. Create a Google Cloud Project
-2. Enable the Vertex AI API
-3. Create an API key or service account
-4. Update the environment variables with your credentials
+## 🏗️ Architecture
 
-## 🛠️ Technologies Used
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Flask API     │    │   Gemini AI     │
+│                 │    │                 │    │                 │
+│ • HTML5         │◄──►│ • Python Flask  │◄──►│ • Gemini 2.0    │
+│ • Tailwind CSS  │    │ • Image Upload  │    │ • Flash Model   │
+│ • JavaScript    │    │ • TTS Support   │    │ • Multilingual  │
+│ • Responsive    │    │ • CORS Enabled  │    │ • Fact Checking │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
-### Frontend
-- **React 18** - UI framework
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **Lucide React** - Icon library
-- **Axios** - HTTP client
+## 🔧 Technical Details
 
 ### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **Google Vertex AI** - AI/ML platform
-- **Multer** - File upload handling
-- **Helmet** - Security middleware
-- **CORS** - Cross-origin resource sharing
+- **Framework**: Flask 3.0+
+- **AI Model**: Google Gemini 2.0 Flash
+- **TTS**: Google Text-to-Speech (gTTS)
+- **Image Processing**: Pillow (PIL)
+- **CORS**: Flask-CORS for cross-origin requests
 
-## 📱 Browser Support
+### Frontend
+- **Styling**: Tailwind CSS
+- **JavaScript**: Vanilla ES6+
+- **Design**: Mobile-first responsive
+- **Theme**: Cyber neon with glassmorphism
+- **Animations**: CSS keyframes and transitions
 
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
+### Performance
+- **Temperature**: 0.2 for factual responses
+- **Max Tokens**: 2048 for detailed analysis
+- **Caching**: Browser caching for static assets
+- **Optimization**: Compressed images and minified CSS
+
+## 📱 Mobile Features
+
+- ✅ **Touch-Friendly**: Large buttons and touch targets
+- ✅ **Responsive Grid**: Adapts to screen size
+- ✅ **Readable Text**: Optimized font sizes
+- ✅ **Fast Loading**: Optimized for mobile networks
+- ✅ **Offline Ready**: Service worker support (coming soon)
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-For support and questions:
-- Check the demo mode functionality first
-- Verify environment variables are set correctly
-- Check browser console for any errors
-- Ensure both frontend and backend servers are running
+- **Google AI**: For providing the Gemini API
+- **Tailwind CSS**: For the responsive design framework
+- **Flask**: For the lightweight web framework
+- **Contributors**: All developers who contributed to this project
+
+## 📞 Support
+
+For support, email [support@truthlens.ai](mailto:support@truthlens.ai) or create an issue on GitHub.
 
 ---
 
-**Built with ❤️ using modern web technologies and AI**
+**Made with ❤️ for fighting misinformation in the digital age**
