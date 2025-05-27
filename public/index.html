@@ -361,21 +361,28 @@
 
                 // Try to call the API, fallback to demo mode if it fails
                 try {
+                    console.log('Attempting API call to:', `${API_BASE_URL}/api/analyze`);
+                    console.log('Selected language:', languageSelect.value);
+
                     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
                         method: 'POST',
                         body: formData
                     });
 
+                    console.log('API Response status:', response.status);
                     const data = await response.json();
+                    console.log('API Response data:', data);
 
                     if (data.success) {
+                        console.log('✅ Using REAL API response in language:', data.data.language);
                         currentResult = data.data;
                         displayResults(data.data);
                     } else {
                         throw new Error(data.error || 'Analysis failed');
                     }
                 } catch (apiError) {
-                    console.log('API not available, using demo mode');
+                    console.log('❌ API not available, using demo mode:', apiError.message);
+                    console.log('🎭 Demo mode - Selected language:', languageSelect.value);
                     // Demo mode - simulate analysis
                     const demoResult = createDemoAnalysis(text, selectedFile, languageSelect.value);
                     currentResult = demoResult;

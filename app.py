@@ -222,6 +222,89 @@ def get_gemini_explanation(text, is_fake, confidence, language='en'):
         }
         return fallback_explanations.get(language, fallback_explanations['en'])
 
+def get_multilingual_content(language, is_fake, confidence):
+    """Get multilingual content for sources, recommendations, etc."""
+
+    # Multilingual content dictionary
+    content = {
+        'hi': {
+            'sources': [
+                {"name": "एमएल मॉडल विश्लेषण", "credibility": "उच्च"},
+                {"name": "टीएफ-आईडीएफ वेक्टराइज़ेशन", "credibility": "उच्च"}
+            ],
+            'red_flags': [
+                "संदिग्ध भाषा पैटर्न का पता चला",
+                "सामग्री की विशेषताएं फेक न्यूज़ ट्रेनिंग डेटा से मेल खाती हैं",
+                "गलत सूचना की उच्च संभावना"
+            ],
+            'recommendation_real': "सामग्री विश्वसनीय लगती है, लेकिन साझा करने से पहले हमेशा कई विश्वसनीय स्रोतों से सत्यापन करें।",
+            'recommendation_fake': "इस सामग्री के साथ सावधानी बरतें। साझा करने से पहले कई विश्वसनीय समाचार स्रोतों से सत्यापन करें।",
+            'debunked_by': ["एमएल मॉडल वर्गीकरण"],
+            'summary': f"एमएल मॉडल ने {confidence}% विश्वास के साथ {'फेक' if is_fake else 'रियल'} के रूप में वर्गीकृत किया",
+            'model_name': "प्रशिक्षित कागल मॉडल"
+        },
+        'ta': {
+            'sources': [
+                {"name": "ML மாதிரி பகுப்பாய்வு", "credibility": "உயர்"},
+                {"name": "TF-IDF வெக்டரைசேஷன்", "credibility": "உயர்"}
+            ],
+            'red_flags': [
+                "சந்தேகத்திற்குரிய மொழி வடிவங்கள் கண்டறியப்பட்டன",
+                "உள்ளடக்க பண்புகள் போலி செய்தி பயிற்சி தரவுடன் பொருந்துகின்றன",
+                "தவறான தகவலின் அதிக வாய்ப்பு"
+            ],
+            'recommendation_real': "உள்ளடக்கம் நம்பகமானதாகத் தோன்றுகிறது, ஆனால் பகிர்வதற்கு முன் எப்போதும் பல நம்பகமான ஆதாரங்களிலிருந்து சரிபார்க்கவும்।",
+            'recommendation_fake': "இந்த உள்ளடக்கத்துடன் எச்சரிக்கையாக இருங்கள். பகிர்வதற்கு முன் பல நம்பகமான செய்தி ஆதாரங்களிலிருந்து சரிபார்க்கவும்।",
+            'debunked_by': ["ML மாதிரி வகைப்பாடு"],
+            'summary': f"ML மாதிரி {confidence}% நம்பிக்கையுடன் {'போலி' if is_fake else 'உண்மை'} என வகைப்படுத்தியது",
+            'model_name': "பயிற்சி பெற்ற Kaggle மாதிரி"
+        },
+        'te': {
+            'sources': [
+                {"name": "ML మోడల్ విశ్లేషణ", "credibility": "అధిక"},
+                {"name": "TF-IDF వెక్టరైజేషన్", "credibility": "అధిక"}
+            ],
+            'red_flags': [
+                "అనుమానాస్పద భాషా నమూనాలు కనుగొనబడ్డాయి",
+                "కంటెంట్ లక్షణాలు ఫేక్ న్యూస్ ట్రైనింగ్ డేటాతో సరిపోలుతున్నాయి",
+                "తప్పుడు సమాచారం యొక్క అధిక సంభావ్యత"
+            ],
+            'recommendation_real': "కంటెంట్ విశ్వసనీయంగా కనిపిస్తుంది, కానీ భాగస్వామ్యం చేయడానికి ముందు ఎల్లప్పుడూ అనేక విశ్వసనీయ మూలాల నుండి ధృవీకరించండి।",
+            'recommendation_fake': "ఈ కంటెంట్‌తో జాగ్రత్తగా ఉండండి। భాగస్వామ్యం చేయడానికి ముందు అనేక విశ్వసనీయ వార్తా మూలాల ద్వారా ధృవీకరించండి।",
+            'debunked_by': ["ML మోడల్ వర్గీకరణ"],
+            'summary': f"ML మోడల్ {confidence}% విశ్వాసంతో {'ఫేక్' if is_fake else 'రియల్'} గా వర్గీకరించింది",
+            'model_name': "శిక్షణ పొందిన Kaggle మోడల్"
+        },
+        'en': {
+            'sources': [
+                {"name": "ML Model Analysis", "credibility": "High"},
+                {"name": "TF-IDF Vectorization", "credibility": "High"}
+            ],
+            'red_flags': [
+                "Suspicious language patterns detected",
+                "Content characteristics match fake news training data",
+                "High probability of misinformation"
+            ],
+            'recommendation_real': "Content appears credible, but always cross-check with multiple sources.",
+            'recommendation_fake': "Always verify news through multiple reliable sources before sharing.",
+            'debunked_by': ["ML Model Classification"],
+            'summary': f"ML Model classified as {'FAKE' if is_fake else 'REAL'} with {confidence}% confidence",
+            'model_name': "Trained Kaggle Model"
+        }
+    }
+
+    # Get content for the specified language, fallback to English
+    lang_content = content.get(language, content['en'])
+
+    return {
+        'sources': lang_content['sources'],
+        'red_flags': lang_content['red_flags'],
+        'recommendation': lang_content['recommendation_fake'] if is_fake else lang_content['recommendation_real'],
+        'debunked_by': lang_content['debunked_by'],
+        'summary': lang_content['summary'],
+        'model_name': lang_content['model_name']
+    }
+
 def create_prompt(text, has_image=False, language='en'):
     language_name = LANGUAGES.get(language, 'English')
 
@@ -333,37 +416,31 @@ def analyze():
         # Step 3: Create response in the expected format
         confidence_percentage = int(ml_confidence * 100)
 
-        # Generate sources based on prediction
-        sources = [
-            {"name": "ML Model Analysis", "credibility": "High"},
-            {"name": "TF-IDF Vectorization", "credibility": "High"}
-        ]
+        # Multilingual content based on language
+        multilingual_content = get_multilingual_content(language, is_fake, confidence_percentage)
 
-        # Generate red flags for fake news
-        red_flags = []
-        if is_fake:
-            red_flags = [
-                "Suspicious language patterns detected",
-                "Content characteristics match fake news training data",
-                "High probability of misinformation"
-            ]
+        # Generate sources based on prediction and language
+        sources = multilingual_content["sources"]
+
+        # Generate red flags for fake news in the target language
+        red_flags = multilingual_content["red_flags"] if is_fake else []
 
         # Create result
         result = {
             "isReal": not is_fake,
             "confidence": confidence_percentage,
-            "reasoning": explanation,
+            "reasoning": explanation,  # This is now in the target language from Gemini
             "sources": sources,
             "redFlags": red_flags,
             "factualClaims": [analysis_text[:200] + "..." if len(analysis_text) > 200 else analysis_text],
-            "recommendation": "Always verify news through multiple reliable sources before sharing." if is_fake else "Content appears credible, but always cross-check with multiple sources.",
-            "debunkedBy": ["ML Model Classification"] if is_fake else [],
+            "recommendation": multilingual_content["recommendation"],
+            "debunkedBy": multilingual_content["debunked_by"] if is_fake else [],
             "language": language,
-            "summary": f"ML Model classified as {'FAKE' if is_fake else 'REAL'} with {confidence_percentage}% confidence",
+            "summary": multilingual_content["summary"],
             "mlPrediction": {
                 "isFake": is_fake,
                 "confidence": ml_confidence,
-                "model": "Trained Kaggle Model"
+                "model": multilingual_content["model_name"]
             }
         }
 
