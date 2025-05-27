@@ -130,8 +130,9 @@ def predict_fake_news(text):
         # Get confidence (probability of the predicted class)
         confidence = max(prediction_proba)
 
-        # Convert prediction to boolean (assuming 1 = fake, 0 = real)
-        is_fake = bool(prediction)
+        # Convert prediction to boolean
+        # Based on testing: 0 = fake, 1 = real (inverted from standard)
+        is_fake = not bool(prediction)  # Invert the prediction
 
         return is_fake, confidence
 
@@ -374,22 +375,33 @@ def text_to_speech():
 
         # Create TTS audio with error handling
         try:
+            print(f"Creating TTS with language: {tts_language}")
             tts = gTTS(text=text, lang=tts_language, slow=False)
+            print("TTS object created successfully")
         except Exception as tts_error:
             print(f"TTS Error for language {tts_language}: {tts_error}")
             # Fallback to English if the language is not supported
+            print("Falling back to English...")
+            tts_language = 'en'
             tts = gTTS(text=text, lang='en', slow=False)
 
         # Save to temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as tmp_file:
+            print(f"Saving TTS to temporary file: {tmp_file.name}")
             tts.save(tmp_file.name)
+            print("TTS saved successfully")
 
             # Read the file and encode as base64
             with open(tmp_file.name, 'rb') as audio_file:
                 audio_data = base64.b64encode(audio_file.read()).decode('utf-8')
+                print(f"Audio data encoded, size: {len(audio_data)} characters")
 
         # Clean up temp file
-        os.unlink(tmp_file.name)
+        try:
+            os.unlink(tmp_file.name)
+            print("Temporary file cleaned up")
+        except Exception as cleanup_error:
+            print(f"Warning: Could not clean up temp file: {cleanup_error}")
 
         return jsonify({
             'success': True,

@@ -281,6 +281,11 @@
         let selectedFile = null;
         let currentResult = null;
 
+        // Define API Base URL globally
+        const API_BASE_URL = window.location.hostname === 'localhost'
+            ? 'http://localhost:5001'
+            : 'https://truthlens-backend-dwa76nbkfq-uc.a.run.app';
+
         // DOM Elements
         const form = document.getElementById('analysisForm');
         const textInput = document.getElementById('textInput');
@@ -353,11 +358,6 @@
                 if (text) formData.append('text', text);
                 if (selectedFile) formData.append('image', selectedFile);
                 formData.append('language', languageSelect.value);
-
-                // Backend URL configuration
-                const API_BASE_URL = window.location.hostname === 'localhost'
-                    ? 'http://localhost:5001'
-                    : 'https://truthlens-backend-dwa76nbkfq-uc.a.run.app'; // Real backend URL
 
                 // Try to call the API, fallback to demo mode if it fails
                 try {
