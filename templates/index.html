@@ -284,7 +284,7 @@
         // Define API Base URL globally
         const API_BASE_URL = window.location.hostname === 'localhost'
             ? 'http://localhost:5001'
-            : 'https://truthlens-backend-dwa76nbkfq-uc.a.run.app';
+            : 'https://truthlens-backend-YOUR_PROJECT_ID-uc.a.run.app';
 
         // DOM Elements
         const form = document.getElementById('analysisForm');
@@ -416,30 +416,55 @@
             const isReal = realScore > fakeScore && fakeScore < 2;
             const confidence = Math.min(95, Math.max(75, 80 + (realScore * 3) - (fakeScore * 5) + Math.random() * 10));
 
-            const languages = {
-                'hi': 'Hindi', 'ta': 'Tamil', 'te': 'Telugu', 'ml': 'Malayalam', 'kn': 'Kannada',
-                'bn': 'Bengali', 'gu': 'Gujarati', 'mr': 'Marathi', 'pa': 'Punjabi',
-                'en': 'English', 'es': 'Spanish', 'fr': 'French', 'de': 'German'
+            // Multilingual explanations
+            const explanations = {
+                'hi': {
+                    real: 'यह सामग्री वैध समाचार रिपोर्टिंग की विशेषताओं को दर्शाती है। विश्वसनीय स्रोत और सत्यापन योग्य दावे मौजूद हैं।',
+                    fake: 'विश्लेषण में गलत सूचना से जुड़े कई संकेतक मिले हैं, जिनमें सनसनीखेज भाषा और भावनात्मक हेरफेर शामिल है।',
+                    recommendation_real: 'सामग्री विश्वसनीय लगती है, लेकिन साझा करने से पहले हमेशा कई विश्वसनीय स्रोतों से सत्यापन करें।',
+                    recommendation_fake: 'इस सामग्री के साथ सावधानी बरतें। साझा करने से पहले कई विश्वसनीय समाचार स्रोतों से सत्यापन करें।'
+                },
+                'ta': {
+                    real: 'இந்த உள்ளடக்கம் நம்பகமான செய்தி அறிக்கையின் பண்புகளைக் காட்டுகிறது। நம்பகமான ஆதாரங்கள் மற்றும் சரிபார்க்கக்கூடிய கூற்றுகள் உள்ளன.',
+                    fake: 'பகுப்பாய்வில் தவறான தகவல்களுடன் தொடர்புடைய பல குறிகாட்டிகள் கண்டறியப்பட்டுள்ளன, இதில் பரபரப்பான மொழி மற்றும் உணர்ச்சிகரமான கையாளுதல் உள்ளது.',
+                    recommendation_real: 'உள்ளடக்கம் நம்பகமானதாகத் தோன்றுகிறது, ஆனால் பகிர்வதற்கு முன் எப்போதும் பல நம்பகமான ஆதாரங்களிலிருந்து சரிபார்க்கவும்.',
+                    recommendation_fake: 'இந்த உள்ளடக்கத்துடன் எச்சரிக்கையாக இருங்கள். பகிர்வதற்கு முன் பல நம்பகமான செய்தி ஆதாரங்களிலிருந்து சரிபார்க்கவும்.'
+                },
+                'te': {
+                    real: 'ఈ కంటెంట్ చట్టబద్ధమైన వార్తా రిపోర్టింగ్ లక్షణాలను చూపిస్తుంది. విశ్వసనీయ మూలాలు మరియు ధృవీకరించదగిన వాదనలు ఉన్నాయి.',
+                    fake: 'విశ్లేషణలో తప్పుడు సమాచారంతో సంబంధం ఉన్న అనేక సూచికలు కనుగొనబడ్డాయి, వీటిలో సంచలనాత్మక భాష మరియు భావోద్వేగ తారుమారు ఉన్నాయి.',
+                    recommendation_real: 'కంటెంట్ విశ్వసనీయంగా కనిపిస్తుంది, కానీ భాగస్వామ్యం చేయడానికి ముందు ఎల్లప్పుడూ అనేక విశ్వసనీయ మూలాల నుండి ధృవీకరించండి.',
+                    recommendation_fake: 'ఈ కంటెంట్‌తో జాగ్రత్తగా ఉండండి. భాగస్వామ్యం చేయడానికి ముందు అనేక విశ్వసనీయ వార్తా మూలాల ద్వారా ధృవీకరించండి.'
+                },
+                'en': {
+                    real: 'This content shows characteristics of legitimate news reporting with factual language patterns. The analysis suggests credible source attribution and verifiable claims.',
+                    fake: 'Analysis reveals several indicators commonly associated with misinformation, including sensationalized language and emotional manipulation tactics designed to encourage sharing without verification.',
+                    recommendation_real: 'Content appears credible, but always verify through multiple reliable sources before sharing.',
+                    recommendation_fake: 'Exercise caution with this content. Verify through multiple reliable news sources before sharing.'
+                }
             };
+
+            const langExplanations = explanations[language] || explanations['en'];
 
             return {
                 isReal: isReal,
                 confidence: Math.round(confidence),
-                reasoning: isReal
-                    ? `This content shows characteristics of legitimate news reporting with factual language patterns. The analysis suggests credible source attribution and verifiable claims.`
-                    : `Analysis reveals several indicators commonly associated with misinformation, including sensationalized language and emotional manipulation tactics designed to encourage sharing without verification.`,
+                reasoning: isReal ? langExplanations.real : langExplanations.fake,
                 sources: [
                     { name: isReal ? "Reuters" : "Unverified Source", credibility: isReal ? "High" : "Low" },
                     { name: isReal ? "Associated Press" : "Social Media", credibility: isReal ? "High" : "Low" }
                 ],
                 redFlags: isReal ? [] : ["Sensationalized language", "Emotional manipulation", "Unverified claims"],
                 factualClaims: [text ? text.substring(0, 100) + "..." : "Image content analysis"],
-                recommendation: isReal
-                    ? "Content appears credible, but always verify through multiple reliable sources before sharing."
-                    : "Exercise caution with this content. Verify through multiple reliable news sources before sharing.",
+                recommendation: isReal ? langExplanations.recommendation_real : langExplanations.recommendation_fake,
                 debunkedBy: isReal ? [] : ["Demo Fact-Checker"],
                 language: language,
-                summary: `Analysis complete in ${languages[language] || 'English'}: ${isReal ? 'REAL' : 'FAKE'} (${Math.round(confidence)}% confidence)`
+                summary: `Analysis complete: ${isReal ? 'REAL' : 'FAKE'} (${Math.round(confidence)}% confidence)`,
+                mlPrediction: {
+                    isFake: !isReal,
+                    confidence: confidence / 100,
+                    model: "Demo ML Model"
+                }
             };
         }
 

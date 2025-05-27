@@ -142,32 +142,68 @@ def predict_fake_news(text):
 
 # Gemini explanation function
 def get_gemini_explanation(text, is_fake, confidence, language='en'):
-    """Get explanation from Gemini AI about why news is fake/real"""
+    """Get explanation from Gemini AI about why news is fake/real in the specified language"""
     try:
+        # Enhanced language mapping with native names
+        language_names = {
+            'hi': 'Hindi (हिंदी)',
+            'ta': 'Tamil (தமிழ்)',
+            'te': 'Telugu (తెలుగు)',
+            'ml': 'Malayalam (മലയാളം)',
+            'kn': 'Kannada (ಕನ್ನಡ)',
+            'bn': 'Bengali (বাংলা)',
+            'gu': 'Gujarati (ગુજરાતી)',
+            'mr': 'Marathi (मराठी)',
+            'pa': 'Punjabi (ਪੰਜਾਬੀ)',
+            'en': 'English',
+            'es': 'Spanish (Español)',
+            'fr': 'French (Français)',
+            'de': 'German (Deutsch)',
+            'it': 'Italian (Italiano)',
+            'pt': 'Portuguese (Português)',
+            'ru': 'Russian (Русский)',
+            'ja': 'Japanese (日本語)',
+            'ko': 'Korean (한국어)',
+            'zh': 'Chinese (中文)',
+            'ar': 'Arabic (العربية)',
+            'tr': 'Turkish (Türkçe)',
+            'nl': 'Dutch (Nederlands)',
+            'sv': 'Swedish (Svenska)'
+        }
+
         status = "FAKE" if is_fake else "REAL"
-        language_name = LANGUAGES.get(language, 'English')
+        language_name = language_names.get(language, 'English')
 
         prompt = f"""
-        You are an expert fact-checker. A machine learning model has classified the following news as {status} with {confidence:.1%} confidence.
+        You are an expert multilingual fact-checker. A machine learning model has analyzed news content and classified it as {status} with {confidence:.1%} confidence.
 
         News Text: "{text}"
 
-        Please provide a detailed explanation in {language_name} about:
-        1. Why this news might be {status.lower()}
-        2. What indicators suggest this classification
-        3. What readers should look for to verify such news
-        4. Recommendations for fact-checking
+        CRITICAL: Respond ENTIRELY in {language_name}. Use native script where applicable (Devanagari for Hindi, Tamil script for Tamil, etc.).
 
-        Respond in {language_name} language only.
-        Keep the explanation clear, educational, and helpful.
-        Format as a clear paragraph without bullet points.
+        Provide a comprehensive explanation covering:
+
+        1. **ML Analysis**: Why the model classified this as {status.lower()}
+        2. **Key Indicators**: Specific patterns that led to this classification
+        3. **Verification Tips**: How readers can fact-check such content
+        4. **Cultural Context**: Misinformation patterns relevant to {language_name} speakers
+        5. **Action Steps**: What readers should do next
+
+        Requirements:
+        - Write ONLY in {language_name}
+        - Use appropriate cultural context
+        - Be educational and helpful
+        - Explain in simple, clear terms
+        - Provide practical advice
+
+        Format as a flowing, educational explanation that empowers users to be better news consumers.
         """
 
         response = gemini_model.generate_content(
             prompt,
             generation_config=genai.types.GenerationConfig(
-                temperature=0.3,
-                max_output_tokens=1000
+                temperature=0.2,  # Lower for more consistent multilingual output
+                max_output_tokens=1500  # More tokens for detailed explanations
             )
         )
 
@@ -175,7 +211,16 @@ def get_gemini_explanation(text, is_fake, confidence, language='en'):
 
     except Exception as e:
         print(f"Gemini Explanation Error: {e}")
-        return f"Unable to generate explanation: {str(e)}"
+        # Provide fallback explanations in the target language
+        fallback_explanations = {
+            'hi': f"मशीन लर्निंग मॉडल ने इस समाचार को {confidence:.1%} विश्वास के साथ {status} के रूप में वर्गीकृत किया है। कृपया कई विश्वसनीय स्रोतों से सत्यापन करें।",
+            'ta': f"இயந்திர கற்றல் மாதிரி இந்த செய்தியை {confidence:.1%} நம்பிக்கையுடன் {status} என வகைப்படுத்தியுள்ளது। பல நம்பகமான ஆதாரங்களில் இருந்து சரிபார்க்கவும்।",
+            'te': f"మెషిన్ లెర్నింగ్ మోడల్ ఈ వార్తను {confidence:.1%} విశ్వాసంతో {status} గా వర్గీకరించింది। దయచేసి అనేక విశ్వసనీయ మూలాల నుండి ధృవీకరించండి।",
+            'ml': f"മെഷീൻ ലേണിംഗ് മോഡൽ ഈ വാർത്തയെ {confidence:.1%} വിശ്വാസത്തോടെ {status} ആയി തരംതിരിച്ചിട്ടുണ്ട്. ദയവായി ഒന്നിലധികം വിശ്വസനീയ സ്രോതസ്സുകളിൽ നിന്ന് പരിശോധിക്കുക।",
+            'kn': f"ಯಂತ್ರ ಕಲಿಕೆ ಮಾದರಿಯು ಈ ಸುದ್ದಿಯನ್ನು {confidence:.1%} ವಿಶ್ವಾಸದೊಂದಿಗೆ {status} ಎಂದು ವರ್ಗೀಕರಿಸಿದೆ. ದಯವಿಟ್ಟು ಅನೇಕ ವಿಶ್ವಾಸಾರ್ಹ ಮೂಲಗಳಿಂದ ಪರಿಶೀಲಿಸಿ।",
+            'en': f"The machine learning model classified this news as {status} with {confidence:.1%} confidence. Please verify through multiple reliable sources."
+        }
+        return fallback_explanations.get(language, fallback_explanations['en'])
 
 def create_prompt(text, has_image=False, language='en'):
     language_name = LANGUAGES.get(language, 'English')
@@ -238,7 +283,10 @@ Remember: Provide ONLY the JSON response with all text fields in {language_name}
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Add cache busting to force browser refresh
+    import time
+    cache_buster = str(int(time.time()))
+    return render_template('index.html', cache_buster=cache_buster)
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():

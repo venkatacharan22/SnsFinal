@@ -16,7 +16,7 @@ steps:
     - '--image'
     - 'gcr.io/$PROJECT_ID/truthlens-backend:latest'
     - '--region'
-    - 'us-central1'
+    - 'us-east1'
     - '--platform'
     - 'managed'
     - '--allow-unauthenticated'
