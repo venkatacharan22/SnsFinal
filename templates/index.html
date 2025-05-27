@@ -407,9 +407,9 @@
         }
 
         function createDemoAnalysis(text, hasImage, language) {
-            // Simple demo analysis based on keywords
-            const fakeNewsKeywords = ['breaking', 'shocking', 'unbelievable', 'secret', 'exposed', 'leaked', 'doctors hate', 'miracle', 'darkness', 'alignment'];
-            const realNewsKeywords = ['according to', 'study shows', 'research', 'published', 'scientists', 'official', 'confirmed'];
+            // Enhanced demo analysis with better balance
+            const fakeNewsKeywords = ['breaking', 'shocking', 'unbelievable', 'secret', 'exposed', 'leaked', 'doctors hate', 'miracle', 'darkness', 'alignment', 'urgent', 'exclusive', 'bombshell'];
+            const realNewsKeywords = ['according to', 'study shows', 'research', 'published', 'scientists', 'official', 'confirmed', 'reported', 'announced', 'data shows', 'survey', 'analysis'];
 
             let fakeScore = 0;
             let realScore = 0;
@@ -418,10 +418,39 @@
                 const lowerText = text.toLowerCase();
                 fakeScore = fakeNewsKeywords.filter(word => lowerText.includes(word)).length;
                 realScore = realNewsKeywords.filter(word => lowerText.includes(word)).length;
+
+                console.log(`Demo Analysis - Text: "${text.substring(0, 50)}..."`);
+                console.log(`Fake indicators found: ${fakeScore} (${fakeNewsKeywords.filter(word => lowerText.includes(word))})`);
+                console.log(`Real indicators found: ${realScore} (${realNewsKeywords.filter(word => lowerText.includes(word))})`);
             }
 
-            const isReal = realScore > fakeScore && fakeScore < 2;
-            const confidence = Math.min(95, Math.max(75, 80 + (realScore * 3) - (fakeScore * 5) + Math.random() * 10));
+            // More balanced logic
+            let isReal;
+            if (fakeScore === 0 && realScore === 0) {
+                // No clear indicators - make it more random but slightly favor real
+                isReal = Math.random() > 0.4; // 60% chance of being real for neutral content
+            } else if (fakeScore > realScore) {
+                isReal = false; // Clear fake indicators
+            } else if (realScore > fakeScore) {
+                isReal = true; // Clear real indicators
+            } else {
+                // Equal scores - slight bias toward real for balanced results
+                isReal = Math.random() > 0.45; // 55% chance of being real
+            }
+
+            // Calculate confidence based on the strength of indicators
+            let baseConfidence = 75;
+            const scoreDifference = Math.abs(fakeScore - realScore);
+            const totalScore = fakeScore + realScore;
+
+            if (totalScore > 0) {
+                baseConfidence += (scoreDifference * 5); // More difference = higher confidence
+                baseConfidence += (totalScore * 2); // More total indicators = higher confidence
+            }
+
+            const confidence = Math.min(95, Math.max(70, baseConfidence + (Math.random() * 10 - 5)));
+
+            console.log(`Demo Result: ${isReal ? 'REAL' : 'FAKE'} with ${confidence.toFixed(1)}% confidence`);
 
             // Multilingual explanations
             const explanations = {

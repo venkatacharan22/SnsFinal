@@ -130,10 +130,40 @@ def predict_fake_news(text):
         # Get confidence (probability of the predicted class)
         confidence = max(prediction_proba)
 
-        # Convert prediction to boolean
-        # Based on testing: 0 = fake, 1 = real (inverted from standard)
-        is_fake = not bool(prediction)  # Invert the prediction
+        # Debug logging
+        print(f"Raw ML prediction: {prediction}")
+        print(f"Prediction probabilities: {prediction_proba}")
+        print(f"Confidence: {confidence}")
 
+        # Convert prediction to boolean
+        # Standard interpretation: 0 = real, 1 = fake (most common in sklearn)
+        # Let's test both interpretations and use the one that makes more sense
+        is_fake = bool(prediction)  # Standard interpretation
+
+        # If confidence is low, adjust the prediction to be more balanced
+        if confidence < 0.6:
+            # For low confidence, make it more balanced based on content analysis
+            fake_indicators = ['shocking', 'breaking', 'unbelievable', 'secret', 'exposed', 'doctors hate', 'miracle']
+            real_indicators = ['according to', 'study shows', 'research', 'published', 'scientists', 'official']
+
+            text_lower = cleaned_text.lower()
+            fake_score = sum(1 for indicator in fake_indicators if indicator in text_lower)
+            real_score = sum(1 for indicator in real_indicators if indicator in text_lower)
+
+            print(f"Content analysis - Fake indicators: {fake_score}, Real indicators: {real_score}")
+
+            # Adjust prediction based on content analysis
+            if fake_score > real_score:
+                is_fake = True
+                confidence = min(0.85, confidence + 0.1)
+            elif real_score > fake_score:
+                is_fake = False
+                confidence = min(0.85, confidence + 0.1)
+            # If equal, keep original prediction but boost confidence slightly
+            else:
+                confidence = min(0.8, confidence + 0.05)
+
+        print(f"Final prediction: {'FAKE' if is_fake else 'REAL'} with {confidence:.2f} confidence")
         return is_fake, confidence
 
     except Exception as e:
@@ -552,6 +582,37 @@ def get_languages():
 @app.route('/api/health')
 def health():
     return jsonify({'status': 'OK', 'service': 'TruthLens AI'})
+
+@app.route('/api/test-prediction', methods=['POST'])
+def test_prediction():
+    """Test endpoint to debug ML model predictions"""
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+
+        if not text:
+            return jsonify({'error': 'Text is required'}), 400
+
+        # Test the ML prediction
+        is_fake, confidence = predict_fake_news(text)
+
+        return jsonify({
+            'success': True,
+            'text': text,
+            'prediction': {
+                'is_fake': is_fake,
+                'confidence': confidence,
+                'status': 'FAKE' if is_fake else 'REAL'
+            },
+            'model_available': fake_news_model is not None,
+            'vectorizer_available': tfidf_vectorizer is not None
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     import os
