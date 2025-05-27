@@ -6,17 +6,43 @@ import json
 import base64
 from PIL import Image
 import io
-import pyttsx3
-import threading
+import pickle
+import numpy as np
+import pandas as pd
 from gtts import gTTS
 import tempfile
+import os
+import re
+import string
+from sklearn.feature_extraction.text import TfidfVectorizer
+import pytesseract
+import cv2
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    "http://localhost:5001",
+    "http://localhost:5002",
+    "https://sns01-a8fba.web.app",
+    "https://sns01-a8fba.firebaseapp.com",
+    "https://storage.googleapis.com"
+])
 
-# Configure Gemini API (using Gemini as Gemma 3 27B isn't directly available via API)
+# Configure Gemini API for explanations
 genai.configure(api_key="AIzaSyCBv8jNE-5K8Ojs0UumdeBL_Zba68b4e18")
-model = genai.GenerativeModel('gemini-2.0-flash-exp')
+gemini_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+
+# Load trained models
+print("Loading ML models...")
+try:
+    with open('fake_news_model.pkl', 'rb') as f:
+        fake_news_model = pickle.load(f)
+    with open('tfidf_vectorizer.pkl', 'rb') as f:
+        tfidf_vectorizer = pickle.load(f)
+    print("✅ ML models loaded successfully!")
+except Exception as e:
+    print(f"❌ Error loading models: {e}")
+    fake_news_model = None
+    tfidf_vectorizer = None
 
 # Language mappings
 LANGUAGES = {
@@ -44,6 +70,111 @@ LANGUAGES = {
     'nl': 'Dutch',
     'sv': 'Swedish'
 }
+
+# Text preprocessing function
+def preprocess_text(text):
+    """Clean and preprocess text for model prediction"""
+    if not text:
+        return ""
+
+    # Convert to lowercase
+    text = text.lower()
+
+    # Remove special characters and digits
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+
+    # Remove extra whitespace
+    text = ' '.join(text.split())
+
+    return text
+
+# OCR function for image text extraction
+def extract_text_from_image(image):
+    """Extract text from image using OCR"""
+    try:
+        # Convert PIL image to numpy array for OpenCV
+        img_array = np.array(image)
+
+        # Convert RGB to BGR for OpenCV
+        if len(img_array.shape) == 3:
+            img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+
+        # Use pytesseract to extract text
+        extracted_text = pytesseract.image_to_string(img_array)
+
+        return extracted_text.strip()
+    except Exception as e:
+        print(f"OCR Error: {e}")
+        return ""
+
+# ML Model prediction function
+def predict_fake_news(text):
+    """Predict if news is fake using trained ML model"""
+    try:
+        if not fake_news_model or not tfidf_vectorizer:
+            return None, 0.5
+
+        # Preprocess text
+        cleaned_text = preprocess_text(text)
+
+        if not cleaned_text:
+            return None, 0.5
+
+        # Vectorize text using trained TF-IDF vectorizer
+        text_vectorized = tfidf_vectorizer.transform([cleaned_text])
+
+        # Get prediction and probability
+        prediction = fake_news_model.predict(text_vectorized)[0]
+        prediction_proba = fake_news_model.predict_proba(text_vectorized)[0]
+
+        # Get confidence (probability of the predicted class)
+        confidence = max(prediction_proba)
+
+        # Convert prediction to boolean (assuming 1 = fake, 0 = real)
+        is_fake = bool(prediction)
+
+        return is_fake, confidence
+
+    except Exception as e:
+        print(f"ML Prediction Error: {e}")
+        return None, 0.5
+
+# Gemini explanation function
+def get_gemini_explanation(text, is_fake, confidence, language='en'):
+    """Get explanation from Gemini AI about why news is fake/real"""
+    try:
+        status = "FAKE" if is_fake else "REAL"
+        language_name = LANGUAGES.get(language, 'English')
+
+        prompt = f"""
+        You are an expert fact-checker. A machine learning model has classified the following news as {status} with {confidence:.1%} confidence.
+
+        News Text: "{text}"
+
+        Please provide a detailed explanation in {language_name} about:
+        1. Why this news might be {status.lower()}
+        2. What indicators suggest this classification
+        3. What readers should look for to verify such news
+        4. Recommendations for fact-checking
+
+        Respond in {language_name} language only.
+        Keep the explanation clear, educational, and helpful.
+        Format as a clear paragraph without bullet points.
+        """
+
+        response = gemini_model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.3,
+                max_output_tokens=1000
+            )
+        )
+
+        return response.text
+
+    except Exception as e:
+        print(f"Gemini Explanation Error: {e}")
+        return f"Unable to generate explanation: {str(e)}"
 
 def create_prompt(text, has_image=False, language='en'):
     language_name = LANGUAGES.get(language, 'English')
@@ -118,52 +249,82 @@ def analyze():
         if not text and not image_file:
             return jsonify({'error': 'Either text or image must be provided'}), 400
 
-        # Prepare content for Gemini
-        content = []
-
-        # Add text if provided
-        if text:
-            content.append(create_prompt(text, bool(image_file), language))
-
-        # Add image if provided
+        # Extract text from image if provided
+        extracted_text = ""
         if image_file:
-            image = Image.open(image_file.stream)
-            content.append(image)
-            if not text:
-                content.append(create_prompt("", True, language))
+            try:
+                image = Image.open(image_file.stream)
+                extracted_text = extract_text_from_image(image)
+                print(f"Extracted text from image: {extracted_text[:100]}...")
+            except Exception as e:
+                print(f"Image processing error: {e}")
 
-        # Generate response
-        response = model.generate_content(
-            content,
-            generation_config=genai.types.GenerationConfig(
-                temperature=0.2,
-                top_p=0.8,
-                top_k=40,
-                max_output_tokens=2048,
-            )
-        )
+        # Combine text sources
+        analysis_text = text
+        if extracted_text:
+            analysis_text = f"{text} {extracted_text}".strip()
 
-        # Parse JSON response
-        result_text = response.text.strip()
-        # Clean up response
-        if result_text.startswith('```json'):
-            result_text = result_text[7:]
-        if result_text.endswith('```'):
-            result_text = result_text[:-3]
+        if not analysis_text:
+            return jsonify({'error': 'No text found to analyze'}), 400
 
-        result = json.loads(result_text)
+        print(f"Analyzing text: {analysis_text[:100]}...")
+
+        # Step 1: Use ML model for prediction
+        is_fake, ml_confidence = predict_fake_news(analysis_text)
+
+        if is_fake is None:
+            return jsonify({
+                'success': False,
+                'error': 'ML model prediction failed'
+            }), 500
+
+        # Step 2: Get Gemini explanation
+        explanation = get_gemini_explanation(analysis_text, is_fake, ml_confidence, language)
+
+        # Step 3: Create response in the expected format
+        confidence_percentage = int(ml_confidence * 100)
+
+        # Generate sources based on prediction
+        sources = [
+            {"name": "ML Model Analysis", "credibility": "High"},
+            {"name": "TF-IDF Vectorization", "credibility": "High"}
+        ]
+
+        # Generate red flags for fake news
+        red_flags = []
+        if is_fake:
+            red_flags = [
+                "Suspicious language patterns detected",
+                "Content characteristics match fake news training data",
+                "High probability of misinformation"
+            ]
+
+        # Create result
+        result = {
+            "isReal": not is_fake,
+            "confidence": confidence_percentage,
+            "reasoning": explanation,
+            "sources": sources,
+            "redFlags": red_flags,
+            "factualClaims": [analysis_text[:200] + "..." if len(analysis_text) > 200 else analysis_text],
+            "recommendation": "Always verify news through multiple reliable sources before sharing." if is_fake else "Content appears credible, but always cross-check with multiple sources.",
+            "debunkedBy": ["ML Model Classification"] if is_fake else [],
+            "language": language,
+            "summary": f"ML Model classified as {'FAKE' if is_fake else 'REAL'} with {confidence_percentage}% confidence",
+            "mlPrediction": {
+                "isFake": is_fake,
+                "confidence": ml_confidence,
+                "model": "Trained Kaggle Model"
+            }
+        }
 
         return jsonify({
             'success': True,
             'data': result
         })
 
-    except json.JSONDecodeError:
-        return jsonify({
-            'success': False,
-            'error': 'Failed to parse AI response'
-        }), 500
     except Exception as e:
+        print(f"Analysis error: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

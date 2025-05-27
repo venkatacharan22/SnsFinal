@@ -136,8 +136,8 @@
             </div>
             <p class="text-xl md:text-3xl typewriter mb-4 md:mb-6 font-bold text-orange-300">Is that headline true?</p>
             <p class="text-lg md:text-xl font-medium max-w-3xl mx-auto text-cyan-200 leading-relaxed px-4">
-                🇮🇳 Advanced multilingual fake news detection powered by Gemini AI.
-                <br class="hidden md:block">Analyze text and images with voice output in Indian & international languages.
+                🤖 ML-powered fake news detection with Kaggle-trained models + Gemini AI explanations.
+                <br class="hidden md:block">📷 OCR text extraction, 🌍 23 languages, 🔊 voice output support.
             </p>
 
             <!-- Language Selection -->
@@ -461,14 +461,33 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
                     <div class="bg-black/40 p-4 md:p-6 rounded-xl border border-orange-400/30">
                         <h4 class="text-lg md:text-xl font-semibold mb-3 flex items-center gap-2 text-orange-300">
-                            🧠 AI Reasoning
+                            🤖 ML Model Prediction
                         </h4>
+                        ${result.mlPrediction ? `
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/80">Model:</span>
+                                    <span class="text-cyan-400 font-semibold">${result.mlPrediction.model}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/80">Prediction:</span>
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${
+                                        result.mlPrediction.isFake ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
+                                    }">${result.mlPrediction.isFake ? 'FAKE' : 'REAL'}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white/80">ML Confidence:</span>
+                                    <span class="text-orange-400 font-semibold">${(result.mlPrediction.confidence * 100).toFixed(1)}%</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <h5 class="text-md font-semibold mb-2 text-orange-300">🧠 AI Explanation</h5>
                         <p class="text-white/90 leading-relaxed text-sm md:text-base">${result.reasoning}</p>
                     </div>
 
                     <div class="bg-black/40 p-4 md:p-6 rounded-xl border border-cyan-400/30">
                         <h4 class="text-lg md:text-xl font-semibold mb-3 flex items-center gap-2 text-cyan-300">
-                            📰 Source Analysis
+                            📊 Analysis Details
                         </h4>
                         <div class="space-y-2">
                             ${result.sources.map(source => `

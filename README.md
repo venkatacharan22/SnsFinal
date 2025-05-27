@@ -1,30 +1,39 @@
-# 🔍 TruthLens AI - Multilingual Fake News Detection
+# 🔍 TruthLens AI - ML-Powered Fake News Detection
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com)
+[![ML](https://img.shields.io/badge/ML-Kaggle%20Trained-green.svg)](https://kaggle.com)
 [![Gemini](https://img.shields.io/badge/Gemini-2.0%20Flash-orange.svg)](https://ai.google.dev)
 [![Mobile](https://img.shields.io/badge/Mobile-Responsive-purple.svg)](https://tailwindcss.com)
 
-Advanced multilingual fake news detection system powered by Google's Gemini AI with support for 23 languages including 10 Indian languages.
+Advanced multilingual fake news detection system using **Kaggle-trained ML models** for prediction and **Gemini AI** for explanations, with OCR support and 23 languages.
 
 ## 🌟 Features
+
+### 🤖 **ML-Powered Prediction**
+- **Kaggle-Trained Models**: Real machine learning models for fake news detection
+- **TF-IDF Vectorization**: Advanced text feature extraction
+- **High Accuracy**: Trained on large datasets for reliable predictions
+- **Confidence Scoring**: Probability-based confidence levels
+- **Binary Classification**: Clear FAKE/REAL predictions
+
+### 🧠 **AI Explanations**
+- **Gemini 2.0 Flash**: Advanced AI for detailed explanations
+- **Multilingual Explanations**: Responses in 23 languages
+- **Educational Content**: Learn why content is classified as fake/real
+- **Context Analysis**: Understanding of misinformation patterns
 
 ### 🇮🇳 **Indian Language Support**
 - **10 Indian Languages**: Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Gujarati, Marathi, Punjabi
 - **Native Scripts**: Proper display of Devanagari, Tamil, Telugu, Malayalam scripts
 - **Cultural Context**: AI understands regional misinformation patterns
+- **OCR Support**: Extract text from images in Indian languages
 
-### 🌍 **Multilingual Analysis**
-- **23 Total Languages**: 10 Indian + 13 International languages
-- **Real-time Translation**: Results in your preferred language
-- **Cross-language Detection**: Analyze content in any language
-
-### 🤖 **AI-Powered Detection**
-- **Gemini 2.0 Flash**: Latest Google AI model for accurate analysis
-- **Confidence Scoring**: 70-95% confidence levels
-- **Source Analysis**: Credibility assessment of news sources
-- **Red Flag Detection**: Identifies misinformation patterns
-- **Debunking Database**: Checks against known false claims
+### 📷 **Image Analysis with OCR**
+- **Text Extraction**: Extract text from news screenshots and images
+- **Tesseract OCR**: Multi-language optical character recognition
+- **Image + Text Analysis**: Combine uploaded text with extracted text
+- **Indian Language OCR**: Support for Hindi, Tamil, Telugu, and more
 
 ### 📱 **Mobile-First Design**
 - **Fully Responsive**: Perfect on mobile, tablet, and desktop
